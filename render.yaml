@@ -1,0 +1,20 @@
+# Render Blueprint for a non-production preview.
+# Render Free web services spin down when idle and are not suitable for production.
+services:
+  - type: web
+    name: studioflow-preview
+    runtime: node
+    plan: free
+    branch: production-foundation
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: APP_ORIGIN
+        sync: false
