@@ -12,9 +12,10 @@ The `production-foundation` branch contains the first authenticated multi-studio
 - Studio-scoped customer and appointment queries.
 - PostgreSQL data model with tenant-aware foreign keys and indexes.
 - Appointment overlap checks serialized per studio.
+- Studio-local appointment scheduling and daily summaries (new studios default to Asia/Kolkata).
 - Basic security headers, same-origin checks and sign-in rate limiting.
 
-This is a development foundation, not a production launch. It has not yet been run against a provisioned PostgreSQL database or passed an automated test suite. Do not use it with real customer data until the test and launch checklist below is complete.
+This is a development foundation, not a production launch. CI runs syntax checks, validation unit tests and a Vite production build, but the app has not yet been exercised against a provisioned PostgreSQL database. Do not use it with real customer data until the test and launch checklist below is complete.
 
 ## Requirements
 
@@ -45,10 +46,11 @@ This is a development foundation, not a production launch. It has not yet been r
 
    ```bash
    npm install
+   npm test
    npm run dev
    ```
 
-Open the Vite URL shown in your terminal (normally `http://localhost:5173`). Create a studio account from the registration screen. The generated studio slug is shown in the workspace sidebar; keep it safe because it is required for sign-in.
+Open the Vite URL shown in your terminal (normally `http://localhost:5173`). For a production-style run, execute `npm run build` and then `npm start`; Express serves the compiled frontend from `dist/`. Create a studio account from the registration screen. The generated studio slug is shown in the workspace sidebar; keep it safe because it is required for sign-in.
 
 ## Environment variables
 
