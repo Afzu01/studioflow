@@ -51,3 +51,11 @@ CREATE INDEX IF NOT EXISTS appointments_studio_start_idx
   ON appointments (studio_id, starts_at);
 CREATE INDEX IF NOT EXISTS appointments_studio_status_start_idx
   ON appointments (studio_id, status, starts_at);
+
+-- Server-side sessions. Cookies contain only an opaque session identifier.
+CREATE TABLE IF NOT EXISTS user_sessions (
+  sid VARCHAR NOT NULL PRIMARY KEY,
+  sess JSON NOT NULL,
+  expire TIMESTAMP(6) NOT NULL
+);
+CREATE INDEX IF NOT EXISTS user_sessions_expire_idx ON user_sessions (expire);
