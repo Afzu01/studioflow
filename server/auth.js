@@ -145,7 +145,7 @@ export function configureAuth(app, pool) {
 
     try {
       const result = await pool.query(
-        `SELECT u.id, u.name, u.email, u.role, u.password_hash, s.id AS studio_id, s.name AS studio_name, s.slug
+        `SELECT u.id, u.name, u.email, u.role, u.password_hash, s.id AS studio_id, s.name AS studio_name, s.slug, s.timezone
          FROM users u JOIN studios s ON s.id = u.studio_id
          WHERE s.slug = $1 AND u.email = $2 LIMIT 1`,
         [studioSlug, email],
@@ -159,7 +159,7 @@ export function configureAuth(app, pool) {
       await saveSession(req);
       res.json({
         user: { id: account.id, name: account.name, email: account.email, role: account.role },
-        studio: { id: account.studio_id, name: account.studio_name, slug: account.slug },
+        studio: { id: account.studio_id, name: account.studio_name, slug: account.slug, timezone: account.timezone },
       });
     } catch (error) {
       next(error);
@@ -181,7 +181,7 @@ export function configureAuth(app, pool) {
       }
       res.json({
         user: { id: account.id, name: account.name, email: account.email, role: account.role },
-        studio: { id: account.studio_id, name: account.studio_name, slug: account.slug },
+        studio: { id: account.studio_id, name: account.studio_name, slug: account.slug, timezone: account.timezone },
       });
     } catch (error) {
       next(error);
@@ -210,7 +210,7 @@ export async function requireAuth(req, res, next) {
   if (!req.session?.userId) return res.status(401).json({ error: 'Please sign in to continue.' });
   try {
     const result = await req.app.locals.db.query(
-      'SELECT id, studio_id, name, email, role FROM users WHERE id = $1 LIMIT 1',
+      'SELECT u.id, u.studio_id, u.name, u.email, u.role, s.timezone FROM users u JOIN studios s ON s.id = u.studio_id WHERE u.id = $1 LIMIT 1',
       [req.session.userId],
     );
     if (!result.rows[0]) return res.status(401).json({ error: 'Please sign in to continue.' });
