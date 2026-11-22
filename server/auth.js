@@ -4,22 +4,9 @@ import connectPgSimple from 'connect-pg-simple';
 import bcrypt from 'bcryptjs';
 import rateLimit from 'express-rate-limit';
 import { randomUUID } from 'node:crypto';
+import { normalizeEmail, isValidEmail, slugify } from './validation.js';
 
 const SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
-
-function normalizeEmail(value) {
-  return String(value ?? '').trim().toLowerCase();
-}
-
-function slugify(value) {
-  return String(value ?? '')
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 48) || 'studio';
-}
 
 function saveSession(req) {
   return new Promise((resolve, reject) => {
