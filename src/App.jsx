@@ -22,6 +22,9 @@ function App() {
   const [mobileNav, setMobileNav] = useState(false);
   const [toast, setToast] = useState('');
   const [loading, setLoading] = useState(true);
+  const [authUser, setAuthUser] = useState(null);
+  const [studio, setStudio] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   async function loadData() {
     setLoading(true);
@@ -38,7 +41,37 @@ function App() {
     } finally { setLoading(false); }
   }
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    let active = true;
+    fetch('/api/auth/me')
+      .then(async (response) => {
+        if (!response.ok) return null;
+        return response.json();
+      })
+      .then((data) => {
+        if (!active) return;
+        if (data) { setAuthUser(data.user); setStudio(data.studio); }
+      })
+      .catch(() => {})
+      .finally(() => { if (active) setAuthLoading(false); });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => { if (authUser) loadData(); }, [authUser]);
+  async function handleAuthenticated(data) {
+    setAuthUser(data.user);
+    setStudio(data.studio);
+  }
+  async function logout() {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      setAuthUser(null);
+      setStudio(null);
+      setSummary(null);
+      setAppointments([]);
+      setCustomers([]);
+    } catch { setToast('Could not sign out. Please try again.'); }
+  }
   useEffect(() => { if (!toast) return; const timer = setTimeout(() => setToast(''), 3600); return () => clearTimeout(timer); }, [toast]);
 
   const filteredAppointments = useMemo(() => appointments.filter((item) => {
@@ -70,10 +103,13 @@ function App() {
     { name: 'Clients', icon: Users },
   ];
 
+  if (authLoading) return <div className="auth-loading">Preparing your studio workspace…</div>;
+  if (!authUser) return <AuthScreen onAuthenticated={handleAuthenticated} />;
+
   return <div className="app-shell">
     <aside className={`sidebar ${mobileNav ? 'sidebar-open' : ''}`}>
       <div className="brand"><span className="brand-mark"><Sparkles size={19} strokeWidth={2.3} /></span><span>studio<span className="brand-light">flow</span></span><button className="mobile-close icon-button" onClick={() => setMobileNav(false)} aria-label="Close menu"><X size={19} /></button></div>
-      <div className="workspace-select"><div className="salon-logo">S</div><div className="workspace-copy"><strong>Studio Serein</strong><span>Beauty studio</span></div><ChevronDown size={15} className="muted" /></div>
+      <div className="workspace-select"><div className="salon-logo">S</div><div className="workspace-copy"><strong>{studio?.name || "Your studio"}</strong><span>Beauty studio</span></div><ChevronDown size={15} className="muted" /></div>
       <div className="nav-label">WORKSPACE</div>
       <nav className="nav-list">{nav.map(({ name, icon: Icon, count }) => <button key={name} className={`nav-item ${section === name ? 'active' : ''}`} onClick={() => { setSection(name); setMobileNav(false); }}><Icon size={18} /><span>{name}</span>{count > 0 && <small>{count}</small>}</button>)}</nav>
       <div className="nav-label tools-label">MANAGE</div>
@@ -82,13 +118,13 @@ function App() {
       <div className="sidebar-spacer" />
       <div className="upgrade-card"><div className="upgrade-icon"><Sparkles size={17} /></div><strong>Your studio, in sync.</strong><p>Everything you need to give every client a great day.</p><button onClick={() => setToast('You’re already on the StudioFlow preview plan.')}>Explore features <ArrowRight size={14} /></button><span className="upgrade-orb orb-one" /><span className="upgrade-orb orb-two" /></div>
       <button className="nav-item help-link" onClick={() => setToast('Need a hand? Write to hello@studioflow.app.')}><CircleHelp size={18} /><span>Help & support</span></button>
-      <div className="profile"><div className="profile-avatar">AC</div><div className="profile-copy"><strong>Alexandra Chen</strong><span>Studio owner</span></div><Ellipsis size={19} className="muted" /></div>
+      <div className="profile"><div className="profile-avatar">{initials(authUser.name)}</div><div className="profile-copy"><strong>{authUser.name}</strong><span>{authUser.role === "owner" ? "Studio owner" : "Studio staff"}</span></div><button className="logout-button" onClick={logout} aria-label="Sign out" title="Sign out"><LogOut size={17} /></button></div>
     </aside>
 
     <main className="main-area">
-      <header className="topbar"><button className="icon-button menu-toggle" onClick={() => setMobileNav(true)} aria-label="Open menu"><Menu size={21} /></button><div className="breadcrumb">Studio Serein <ChevronRight size={14} /> <span>{section}</span></div><div className="topbar-actions"><button className="today-button" onClick={() => setToast(dateLabel.format(new Date()))}><CalendarDays size={16} /> Today <ChevronDown size={13} /></button><button className="icon-button notification-button" aria-label="Notifications" onClick={() => setToast('You’re all caught up!')}><Bell size={19} /><i /></button><div className="top-avatar">AC</div></div></header>
+      <header className="topbar"><button className="icon-button menu-toggle" onClick={() => setMobileNav(true)} aria-label="Open menu"><Menu size={21} /></button><div className="breadcrumb">{studio?.name || "Your studio"} <ChevronRight size={14} /> <span>{section}</span></div><div className="topbar-actions"><button className="today-button" onClick={() => setToast(dateLabel.format(new Date()))}><CalendarDays size={16} /> Today <ChevronDown size={13} /></button><button className="icon-button notification-button" aria-label="Notifications" onClick={() => setToast('You’re all caught up!')}><Bell size={19} /><i /></button><div className="top-avatar">AC</div></div></header>
       <div className="page-content">
-        <div className="page-heading"><div><div className="eyebrow">{dateLabel.format(new Date())}</div><h1>{section === 'Overview' ? 'Good morning, Alexandra' : section}</h1><p>{section === 'Overview' ? 'Here’s what’s happening at your studio today.' : section === 'Clients' ? 'Get to know the people who make your studio special.' : 'Keep your day running right on schedule.'}</p></div><button className="primary-button" onClick={() => setModal(true)}><Plus size={17} /> New booking</button></div>
+        <div className="page-heading"><div><div className="eyebrow">{dateLabel.format(new Date())}</div><h1>{section === 'Overview' ? 'Good morning, {authUser.name.split(' ')[0]}' : section}</h1><p>{section === 'Overview' ? 'Here’s what’s happening at your studio today.' : section === 'Clients' ? 'Get to know the people who make your studio special.' : 'Keep your day running right on schedule.'}</p></div><button className="primary-button" onClick={() => setModal(true)}><Plus size={17} /> New booking</button></div>
 
         {section === 'Overview' && <>
           <section className="stats-grid">
@@ -119,6 +155,56 @@ function App() {
     {modal && <BookingModal onClose={() => setModal(false)} onSubmit={createAppointment} />}
     {toast && <div className="toast"><span className="toast-check"><Check size={14} /></span>{toast}<button onClick={() => setToast('')} aria-label="Dismiss"><X size={15} /></button></div>}
   </div>;
+}
+
+
+function AuthScreen({ onAuthenticated }) {
+  const [mode, setMode] = useState('register');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  async function submit(event) {
+    event.preventDefault();
+    setBusy(true);
+    setError('');
+    const form = new FormData(event.currentTarget);
+    const payload = Object.fromEntries(form.entries());
+    try {
+      const response = await fetch(`/api/auth/${mode === 'register' ? 'register' : 'login'}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = response.status === 204 ? {} : await response.json();
+      if (!response.ok) throw new Error(data.error || 'Could not sign in. Please try again.');
+      onAuthenticated(data);
+    } catch (err) {
+      setError(err.message || 'Could not connect. Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return <main className="auth-page">
+    <section className="auth-card">
+      <div className="auth-brand"><span className="brand-mark"><Sparkles size={19} strokeWidth={2.3} /></span><span>studio<span className="brand-light">flow</span></span></div>
+      <span className="auth-eyebrow">{mode === 'register' ? 'A BETTER DAY STARTS HERE' : 'WELCOME BACK'}</span>
+      <h1>{mode === 'register' ? 'Create your studio account' : 'Sign in to your studio'}</h1>
+      <p className="auth-intro">{mode === 'register' ? 'Set up your workspace to manage appointments and clients.' : 'Enter your studio details to continue to your workspace.'}</p>
+      <form className="auth-form" onSubmit={submit}>
+        {mode === 'register' ? <>
+          <label>Studio name<input name="studioName" autoComplete="organization" placeholder="e.g. Studio Serein" minLength="2" maxLength="120" required /></label>
+          <label>Your name<input name="ownerName" autoComplete="name" placeholder="e.g. Priya Sharma" minLength="2" maxLength="120" required /></label>
+        </> : <label>Studio address<input name="studioSlug" autoComplete="organization" placeholder="e.g. studio-serein-a1b2c3d4" required /></label>}
+        <label>Email address<input name="email" type="email" autoComplete="email" placeholder="you@example.com" required /></label>
+        <label>Password<input name="password" type="password" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} minLength={mode === 'register' ? 12 : 1} maxLength="128" placeholder={mode === 'register' ? 'At least 12 characters' : 'Your password'} required /></label>
+        {error && <div className="form-error" role="alert">{error}</div>}
+        <button type="submit" className="primary-button auth-submit" disabled={busy}>{busy ? 'Please wait…' : mode === 'register' ? 'Create studio account' : 'Sign in'}</button>
+      </form>
+      <p className="auth-switch">{mode === 'register' ? 'Already have an account?' : 'New to StudioFlow?'} <button type="button" onClick={() => { setMode(mode === 'register' ? 'login' : 'register'); setError(''); }}>{mode === 'register' ? 'Sign in' : 'Create an account'}</button></p>
+      <p className="auth-security">Your studio data is private to your workspace.</p>
+    </section>
+  </main>;
 }
 
 function StatCard({ label, value, icon: Icon, tint, change, direction, helper }) {
