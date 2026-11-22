@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS studios (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL CHECK (char_length(name) BETWEEN 2 AND 120),
   slug TEXT NOT NULL UNIQUE,
+  timezone TEXT NOT NULL DEFAULT 'Asia/Kolkata',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
