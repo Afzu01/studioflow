@@ -5,6 +5,7 @@ import pg from 'pg';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { configureAuth, requireAuth } from './auth.js';
+import { isValidEmail, isValidLocalDateTime } from './validation.js';
 
 const { Pool } = pg;
 const databaseUrl = process.env.DATABASE_URL;
