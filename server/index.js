@@ -136,7 +136,6 @@ app.post('/api/appointments', async (req, res, next) => {
     await client.query('BEGIN');
     // Serialize booking writes per studio so simultaneous requests cannot double-book a slot.
     await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [req.user.studio_id]);
-    const start = new Date(startsAt);
     const conflict = await client.query(
       `SELECT id FROM appointments
        WHERE studio_id = $1 AND status = 'confirmed'
