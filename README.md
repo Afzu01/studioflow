@@ -1,52 +1,98 @@
 # StudioFlow
 
-A full-stack appointment and client management dashboard for a boutique beauty studio. StudioFlow gives a small service business a clear daily schedule, client history, and a lightweight view of studio performance.
+StudioFlow is an appointment and client-management workspace for independent salons and beauty studios.
+
+## Current development status
+
+The `production-foundation` branch contains the first authenticated multi-studio implementation:
+
+- Salon-owner registration and sign-in.
+- Password hashing with bcrypt.
+- Server-side sessions stored in PostgreSQL; browser cookies are HTTP-only.
+- Studio-scoped customer and appointment queries.
+- PostgreSQL data model with tenant-aware foreign keys and indexes.
+- Appointment overlap checks serialized per studio.
+- Basic security headers, same-origin checks and sign-in rate limiting.
+
+This is a development foundation, not a production launch. It has not yet been run against a provisioned PostgreSQL database or passed an automated test suite. Do not use it with real customer data until the test and launch checklist below is complete.
+
+## Requirements
+
+- Node.js 20.6 or newer
+- PostgreSQL 15 or newer (a managed PostgreSQL service such as Neon is suitable)
+- npm
 
 ## Run locally
 
-Requirements: Node.js 20 or newer.
+1. Create a PostgreSQL database.
+2. Copy `.env.example` to `.env`.
+3. Set `DATABASE_URL` to your database connection string.
+4. Generate a session secret with:
 
-```bash
-npm install
-npm run dev
-```
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+   ```
 
-Open the Vite address shown in your terminal (usually `http://localhost:5173`). The Express API runs at `http://localhost:4000`. SQLite creates `server/data/studioflow.sqlite` on first run and seeds a handful of sample clients and appointments. To build the frontend, run `npm run build`. To serve only the API, run `npm start`.
+   Put the generated value in `SESSION_SECRET`. Never commit the real `.env` file.
+5. Keep `APP_ORIGIN=http://localhost:5173` for local Vite development.
+6. Apply the schema:
 
-## What it demonstrates
+   ```bash
+   psql "$DATABASE_URL" -f server/schema.postgres.sql
+   ```
 
-- Responsive React dashboard with overview, appointment, and client views.
-- Express REST API for dashboard metrics, clients, bookings, and booking status updates.
-- SQLite relational data model for clients and appointments, with indexed dates and foreign keys.
-- Appointment creation with client lookup by email, validation, and useful API errors.
-- Search, status filtering, CSV export, and appointment completion.
-- Vite development proxy so the UI can call the API at `/api` without extra setup.
+7. Install dependencies and start the app:
+
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+Open the Vite URL shown in your terminal (normally `http://localhost:5173`). Create a studio account from the registration screen. The generated studio slug is shown in the workspace sidebar; keep it safe because it is required for sign-in.
+
+## Environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `SESSION_SECRET` | Random secret, at least 32 characters |
+| `APP_ORIGIN` | Exact browser origin allowed to make API mutations |
+| `PORT` | API port; defaults to 4000 |
+| `NODE_ENV` | Set to `production` in the hosted environment |
 
 ## API
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/health` | Service health |
-| `GET` | `/api/summary` | Dashboard metrics |
-| `GET` | `/api/appointments?status=confirmed&search=Olivia` | Search and filter bookings |
-| `POST` | `/api/appointments` | Add a booking and create or reuse its client |
-| `PATCH` | `/api/appointments/:id/status` | Mark a booking confirmed, completed, or cancelled |
-| `GET` | `/api/customers` | Client list and lifetime booking value |
+| `GET` | `/api/health` | Database-backed health check |
+| `POST` | `/api/auth/register` | Create a studio and its owner account |
+| `POST` | `/api/auth/login` | Sign in using studio slug, email and password |
+| `GET` | `/api/auth/me` | Return the current signed-in account |
+| `POST` | `/api/auth/logout` | End the current session |
+| `GET` | `/api/summary` | Studio dashboard metrics (authentication required) |
+| `GET` | `/api/appointments` | Studio appointments (authentication required) |
+| `POST` | `/api/appointments` | Create a studio appointment (authentication required) |
+| `PATCH` | `/api/appointments/:id/status` | Update a studio appointment (authentication required) |
+| `GET` | `/api/customers` | Studio customers (authentication required) |
 
-`POST /api/appointments` accepts `name`, `email`, `service`, and `startsAt`; `phone`, `durationMinutes`, `amount`, and `notes` are optional. `startsAt` should be an ISO date-time string.
+## Before any public or commercial launch
+
+- Run dependency installation, production build, linting and automated API tests.
+- Test registration, login, logout, session expiry and password handling.
+- Prove tenant isolation with two separate studios and attempt cross-studio reads and writes.
+- Test appointment overlaps, simultaneous booking requests, invalid inputs and timezone boundaries.
+- Add email verification, password reset, staff invitations and role-based permissions.
+- Add a studio timezone setting and use it consistently for calendar display and reporting.
+- Add database backups, restore drills, monitoring, error reporting and a migration process.
+- Configure HTTPS, production secrets, trusted proxy settings, database connection limits and a permitted commercial hosting plan.
+- Review privacy policy, terms, data retention and applicable customer-data obligations.
 
 ## Project structure
 
 ```text
-src/                 React application and responsive styles
-server/index.js      Express API, SQLite schema, demo data
-vite.config.js       React plugin and local API proxy
+src/App.jsx             React dashboard and owner authentication screens
+src/styles.css          Responsive dashboard and authentication styles
+server/index.js         Authenticated PostgreSQL API
+server/auth.js          Registration, login, sessions and auth middleware
+server/schema.postgres.sql PostgreSQL schema and session table
 ```
-
-## Interview walkthrough
-
-Start with the dashboard: it combines small-business KPIs with the actual day schedule. Add an appointment to show the full request path from a React form through Express validation into SQLite. Then complete a booking and show how the refreshed summary and client history are derived from relational data. The project is intentionally small enough to explain in a short interview while covering the job description’s frontend, backend, API, database, and deployment fundamentals.
-
-## Production next steps
-
-For a real studio: add sign-in and role-based permissions, timezone-aware scheduling and conflict checks, request rate limiting, automated backups, migrations, and payment processing. Keep secrets in environment variables and serve behind HTTPS.
