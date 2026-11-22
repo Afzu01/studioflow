@@ -1,11 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isValidEmail, isValidLocalDateTime, normalizeEmail, slugify } from './validation.js';
+import {
+  isValidDateOnly, isValidEmail, isValidLocalDateTime,
+  isValidPassword, normalizeEmail, slugify,
+} from './validation.js';
 
 test('normalizes email addresses', () => {
   assert.equal(normalizeEmail('  OWNER@Example.COM '), 'owner@example.com');
   assert.equal(isValidEmail(' owner@example.com '), true);
   assert.equal(isValidEmail('not-an-email'), false);
+});
+
+test('requires a strong password within bcrypt UTF-8 byte limits', () => {
+  assert.equal(isValidPassword('correct-horse-battery'), true);
+  assert.equal(isValidPassword('short'), false);
+  assert.equal(isValidPassword('a'.repeat(73)), false);
+  assert.equal(isValidPassword('😀'.repeat(19)), false);
+});
+
+test('accepts real calendar dates and rejects impossible dates', () => {
+  assert.equal(isValidDateOnly('2024-02-29'), true);
+  assert.equal(isValidDateOnly('2026-11-22'), true);
+  for (const value of ['2026-02-29', '2026-13-01', '2026-04-31', '22-11-2026', '']) {
+    assert.equal(isValidDateOnly(value), false, String(value));
+  }
 });
 
 test('accepts valid local date and time values', () => {
