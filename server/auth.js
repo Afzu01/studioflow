@@ -108,7 +108,7 @@ export function configureAuth(app, pool) {
       const studioId = randomUUID();
       const slug = `${slugify(studioName)}-${randomUUID().slice(0, 8)}`;
       const studio = await client.query(
-        'INSERT INTO studios (id, name, slug) VALUES ($1, $2, $3) RETURNING id, name, slug',
+        'INSERT INTO studios (id, name, slug) VALUES ($1, $2, $3) RETURNING id, name, slug, timezone',
         [studioId, studioName, slug],
       );
       const passwordHash = await bcrypt.hash(password, 12);
@@ -170,7 +170,7 @@ export function configureAuth(app, pool) {
     if (!req.session.userId) return res.status(401).json({ error: 'Not signed in.' });
     try {
       const result = await pool.query(
-        `SELECT u.id, u.name, u.email, u.role, s.id AS studio_id, s.name AS studio_name, s.slug
+        `SELECT u.id, u.name, u.email, u.role, s.id AS studio_id, s.name AS studio_name, s.slug, s.timezone
          FROM users u JOIN studios s ON s.id = u.studio_id WHERE u.id = $1 LIMIT 1`,
         [req.session.userId],
       );
