@@ -5,7 +5,7 @@ import pg from 'pg';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { configureAuth, requireAuth } from './auth.js';
-import { isValidEmail, isValidLocalDateTime } from './validation.js';
+import { isValidDateOnly, isValidEmail, isValidLocalDateTime } from './validation.js';
 
 const { Pool } = pg;
 const databaseUrl = process.env.DATABASE_URL;
@@ -59,6 +59,7 @@ app.get('/api/appointments', async (req, res, next) => {
       conditions.push(`a.status = $${values.length}`);
     }
     if (day) {
+      if (!isValidDateOnly(day)) return res.status(400).json({ error: 'Choose a valid calendar date.' });
       values.push(req.user.timezone, day);
       conditions.push(`(a.starts_at AT TIME ZONE ${values.length - 1})::date = ${values.length}::date`);
     }
@@ -98,14 +99,21 @@ app.get('/api/customers', async (req, res, next) => {
 app.get('/api/summary', async (req, res, next) => {
   try {
     const result = await pool.query(
-      `SELECT
-         COUNT(*) FILTER (WHERE (starts_at AT TIME ZONE $2)::date = (now() AT TIME ZONE $2)::date AND status <> 'cancelled')::int AS "todayBookings",
-         COALESCE(SUM(amount) FILTER (WHERE (starts_at AT TIME ZONE $2)::date = (now() AT TIME ZONE $2)::date AND status <> 'cancelled'), 0)::float AS "todayRevenue",
-         COUNT(DISTINCT customer_id)::int AS "totalCustomers",
-         COUNT(*) FILTER (WHERE status = 'completed' AND starts_at >= now() - interval '30 days')::int AS "completedThisMonth",
-         COALESCE(SUM(amount) FILTER (WHERE status = 'completed' AND starts_at >= now() - interval '30 days'), 0)::float AS "monthRevenue",
-         COUNT(*) FILTER (WHERE starts_at >= now() AND status = 'confirmed')::int AS "upcomingBookings"
-       FROM appointments WHERE studio_id = $1`,
+      `WITH studio_clock AS (
+         SELECT
+           (now() AT TIME ZONE $2)::date AS today,
+           date_trunc('month', now() AT TIME ZONE $2) AS month_start,
+           date_trunc('month', now() AT TIME ZONE $2) + interval '1 month' AS next_month_start
+       )
+       SELECT
+         COUNT(*) FILTER (WHERE (a.starts_at AT TIME ZONE $2)::date = clock.today AND a.status <> 'cancelled')::int AS "todayBookings",
+         COALESCE(SUM(a.amount) FILTER (WHERE (a.starts_at AT TIME ZONE $2)::date = clock.today AND a.status <> 'cancelled'), 0)::float AS "todayRevenue",
+         COUNT(DISTINCT a.customer_id)::int AS "totalCustomers",
+         COUNT(*) FILTER (WHERE a.status = 'completed' AND a.starts_at >= (clock.month_start AT TIME ZONE $2) AND a.starts_at < (clock.next_month_start AT TIME ZONE $2))::int AS "completedThisMonth",
+         COALESCE(SUM(a.amount) FILTER (WHERE a.status = 'completed' AND a.starts_at >= (clock.month_start AT TIME ZONE $2) AND a.starts_at < (clock.next_month_start AT TIME ZONE $2)), 0)::float AS "monthRevenue",
+         COUNT(*) FILTER (WHERE a.starts_at >= now() AND a.status = 'confirmed')::int AS "upcomingBookings"
+       FROM appointments a CROSS JOIN studio_clock clock
+       WHERE a.studio_id = $1`,
       [req.user.studio_id, req.user.timezone],
     );
     const customers = await pool.query('SELECT COUNT(*)::int AS count FROM customers WHERE studio_id = $1', [req.user.studio_id]);
@@ -124,8 +132,7 @@ app.post('/api/appointments', async (req, res, next) => {
   if (![name, cleanEmail, service, startsAt].every((value) => typeof value === 'string' && value.trim())) {
     return res.status(400).json({ error: 'Name, email, service and appointment time are required.' });
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail) ||
-      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?$/.test(startsAt) || !Number.isFinite(Date.parse(startsAt)) ||
+  if (!isValidEmail(cleanEmail) || !isValidLocalDateTime(startsAt) ||
       !Number.isInteger(duration) || duration < 15 || duration > 720 ||
       !Number.isFinite(price) || price < 0 || price > 1_000_000 ||
       String(name).trim().length > 120 || String(service).trim().length > 120) {
