@@ -4,7 +4,7 @@ import connectPgSimple from 'connect-pg-simple';
 import bcrypt from 'bcryptjs';
 import rateLimit from 'express-rate-limit';
 import { randomUUID } from 'node:crypto';
-import { normalizeEmail, isValidEmail, slugify } from './validation.js';
+import { normalizeEmail, isValidEmail, isValidPassword, slugify } from './validation.js';
 
 const SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 
@@ -82,10 +82,9 @@ export function configureAuth(app, pool) {
 
     if (studioName.length < 2 || studioName.length > 120 ||
         ownerName.length < 2 || ownerName.length > 120 ||
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
-        password.length < 12 || password.length > 128) {
+        !isValidEmail(email) || !isValidPassword(password)) {
       return res.status(400).json({
-        error: 'Enter a valid studio name, owner name and email. Passwords must be 12–128 characters.',
+        error: 'Enter a valid studio name, owner name and email. Passwords must be at least 12 characters and no more than 72 UTF-8 bytes.',
       });
     }
 
@@ -126,7 +125,7 @@ export function configureAuth(app, pool) {
     const studioSlug = String(req.body?.studioSlug ?? '').trim().toLowerCase();
     const email = normalizeEmail(req.body?.email);
     const password = String(req.body?.password ?? '');
-    if (!studioSlug || !email || !password || password.length > 128) {
+    if (!studioSlug || !isValidEmail(email) || !password || Buffer.byteLength(password, 'utf8') > 72) {
       return res.status(400).json({ error: 'Enter your studio address, email and password.' });
     }
 
