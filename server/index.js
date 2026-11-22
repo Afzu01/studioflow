@@ -2,6 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import helmet from 'helmet';
 import pg from 'pg';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { configureAuth, requireAuth } from './auth.js';
 
 const { Pool } = pg;
@@ -56,8 +58,8 @@ app.get('/api/appointments', async (req, res, next) => {
       conditions.push(`a.status = $${values.length}`);
     }
     if (day) {
-      values.push(day);
-      conditions.push(`(a.starts_at AT TIME ZONE 'UTC')::date = $${values.length}::date`);
+      values.push(req.user.timezone, day);
+      conditions.push(`(a.starts_at AT TIME ZONE ${values.length - 1})::date = ${values.length}::date`);
     }
     if (search) {
       values.push(`%${String(search).slice(0, 100)}%`);
@@ -96,14 +98,14 @@ app.get('/api/summary', async (req, res, next) => {
   try {
     const result = await pool.query(
       `SELECT
-         COUNT(*) FILTER (WHERE (starts_at AT TIME ZONE 'UTC')::date = (now() AT TIME ZONE 'UTC')::date AND status <> 'cancelled')::int AS "todayBookings",
-         COALESCE(SUM(amount) FILTER (WHERE (starts_at AT TIME ZONE 'UTC')::date = (now() AT TIME ZONE 'UTC')::date AND status <> 'cancelled'), 0)::float AS "todayRevenue",
+         COUNT(*) FILTER (WHERE (starts_at AT TIME ZONE $2)::date = (now() AT TIME ZONE $2)::date AND status <> 'cancelled')::int AS "todayBookings",
+         COALESCE(SUM(amount) FILTER (WHERE (starts_at AT TIME ZONE $2)::date = (now() AT TIME ZONE $2)::date AND status <> 'cancelled'), 0)::float AS "todayRevenue",
          COUNT(DISTINCT customer_id)::int AS "totalCustomers",
          COUNT(*) FILTER (WHERE status = 'completed' AND starts_at >= now() - interval '30 days')::int AS "completedThisMonth",
          COALESCE(SUM(amount) FILTER (WHERE status = 'completed' AND starts_at >= now() - interval '30 days'), 0)::float AS "monthRevenue",
          COUNT(*) FILTER (WHERE starts_at >= now() AND status = 'confirmed')::int AS "upcomingBookings"
        FROM appointments WHERE studio_id = $1`,
-      [req.user.studio_id],
+      [req.user.studio_id, req.user.timezone],
     );
     const customers = await pool.query('SELECT COUNT(*)::int AS count FROM customers WHERE studio_id = $1', [req.user.studio_id]);
     res.json({ ...result.rows[0], totalCustomers: customers.rows[0].count });
@@ -122,7 +124,7 @@ app.post('/api/appointments', async (req, res, next) => {
     return res.status(400).json({ error: 'Name, email, service and appointment time are required.' });
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail) ||
-      !Number.isFinite(Date.parse(startsAt)) ||
+      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?$/.test(startsAt) || !Number.isFinite(Date.parse(startsAt)) ||
       !Number.isInteger(duration) || duration < 15 || duration > 720 ||
       !Number.isFinite(price) || price < 0 || price > 1_000_000 ||
       String(name).trim().length > 120 || String(service).trim().length > 120) {
@@ -138,10 +140,10 @@ app.post('/api/appointments', async (req, res, next) => {
     const conflict = await client.query(
       `SELECT id FROM appointments
        WHERE studio_id = $1 AND status = 'confirmed'
-         AND starts_at < $2::timestamptz + ($3 * interval '1 minute')
-         AND starts_at + (duration_minutes * interval '1 minute') > $2::timestamptz
+         AND starts_at < ($2::timestamp AT TIME ZONE $4) + ($3 * interval '1 minute')
+         AND starts_at + (duration_minutes * interval '1 minute') > ($2::timestamp AT TIME ZONE $4)
        LIMIT 1`,
-      [req.user.studio_id, start.toISOString(), duration],
+      [req.user.studio_id, startsAt, duration, req.user.timezone],
     );
     if (conflict.rowCount) {
       await client.query('ROLLBACK');
@@ -159,11 +161,11 @@ app.post('/api/appointments', async (req, res, next) => {
     const appointment = await client.query(
       `INSERT INTO appointments
        (studio_id, customer_id, service, starts_at, duration_minutes, amount, notes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       VALUES ($1, $2, $3, ($4::timestamp AT TIME ZONE $8), $5, $6, $7)
        RETURNING id, customer_id AS "customerId", service, starts_at AS "startsAt",
                  duration_minutes AS "durationMinutes", amount::float AS amount, status, notes`,
       [req.user.studio_id, customer.rows[0].id, String(service).trim(),
-       start.toISOString(), duration, price, String(notes).slice(0, 1000)],
+       startsAt, duration, price, String(notes).slice(0, 1000), req.user.timezone],
     );
     await client.query('COMMIT');
     const result = await pool.query(
@@ -211,6 +213,14 @@ app.patch('/api/appointments/:id/status', async (req, res, next) => {
 app.use((error, _req, res, _next) => {
   console.error('StudioFlow API error:', error);
   res.status(500).json({ error: 'Something went wrong. Please try again.' });
+});
+
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const distDir = path.resolve(currentDir, '../dist');
+app.use(express.static(distDir));
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'API endpoint not found.' });
+  res.sendFile(path.join(distDir, 'index.html'), (error) => error && next(error));
 });
 
 const port = Number(process.env.PORT) || 4000;
