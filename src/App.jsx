@@ -217,7 +217,7 @@ function AuthScreen({ onAuthenticated }) {
           <label>Your name<input name="ownerName" autoComplete="name" placeholder="e.g. Priya Sharma" minLength="2" maxLength="120" required /></label>
         </> : <label>Studio address<input name="studioSlug" autoComplete="organization" placeholder="e.g. studio-serein-a1b2c3d4" required /></label>}
         <label>Email address<input name="email" type="email" autoComplete="email" placeholder="you@example.com" required /></label>
-        <label>Password<input name="password" type="password" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} minLength={mode === 'register' ? 12 : 1} maxLength="128" placeholder={mode === 'register' ? 'At least 12 characters' : 'Your password'} required /></label>
+        <label>Password<input name="password" type="password" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} minLength={mode === 'register' ? 12 : 1} maxLength="72" placeholder={mode === 'register' ? '12+ characters, up to 72 bytes' : 'Your password'} required /></label>
         {error && <div className="form-error" role="alert">{error}</div>}
         <button type="submit" className="primary-button auth-submit" disabled={busy}>{busy ? 'Please wait…' : mode === 'register' ? 'Create studio account' : 'Sign in'}</button>
       </form>
