@@ -109,7 +109,7 @@ function App() {
   return <div className="app-shell">
     <aside className={`sidebar ${mobileNav ? 'sidebar-open' : ''}`}>
       <div className="brand"><span className="brand-mark"><Sparkles size={19} strokeWidth={2.3} /></span><span>studio<span className="brand-light">flow</span></span><button className="mobile-close icon-button" onClick={() => setMobileNav(false)} aria-label="Close menu"><X size={19} /></button></div>
-      <div className="workspace-select"><div className="salon-logo">S</div><div className="workspace-copy"><strong>{studio?.name || "Your studio"}</strong><span>Beauty studio</span></div><ChevronDown size={15} className="muted" /></div>
+      <div className="workspace-select"><div className="salon-logo">S</div><div className="workspace-copy"><strong>{studio?.name || "Your studio"}</strong><span>{studio?.slug || "Studio workspace"}</span></div><ChevronDown size={15} className="muted" /></div>
       <div className="nav-label">WORKSPACE</div>
       <nav className="nav-list">{nav.map(({ name, icon: Icon, count }) => <button key={name} className={`nav-item ${section === name ? 'active' : ''}`} onClick={() => { setSection(name); setMobileNav(false); }}><Icon size={18} /><span>{name}</span>{count > 0 && <small>{count}</small>}</button>)}</nav>
       <div className="nav-label tools-label">MANAGE</div>
