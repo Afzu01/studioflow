@@ -12,6 +12,8 @@ The `production-foundation` branch contains the first authenticated multi-studio
 - Studio-scoped customer and appointment queries.
 - PostgreSQL data model with tenant-aware foreign keys and indexes.
 - Appointment overlap checks serialized per studio.
+- Studio-local date/time handling for the dashboard, booking form, and monthly metrics.
+- PostgreSQL-backed integration tests for registration, session enforcement, tenant isolation, malformed dates, and booking conflicts.
 - Studio-local appointment scheduling and daily summaries (new studios default to Asia/Kolkata).
 - Basic security headers, same-origin checks and sign-in rate limiting.
 
@@ -79,7 +81,7 @@ Open the Vite URL shown in your terminal (normally `http://localhost:5173`). For
 
 ## Before any public or commercial launch
 
-- Run dependency installation, production build, linting and automated API tests.
+- Run dependency installation, production build, linting and automated API tests (the CI workflow provisions a temporary PostgreSQL instance and runs the API integration suite).
 - Test registration, login, logout, session expiry and password handling.
 - Prove tenant isolation with two separate studios and attempt cross-studio reads and writes.
 - Test appointment overlaps, simultaneous booking requests, invalid inputs and timezone boundaries.
