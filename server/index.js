@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import helmet from 'helmet';
 import pg from 'pg';
@@ -21,6 +22,15 @@ app.disable('x-powered-by');
 app.use(helmet());
 app.use(express.json({ limit: '32kb' }));
 configureAuth(app, pool);
+
+app.use('/api', (req, res, next) => {
+  if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) return next();
+  const origin = req.get('origin');
+  if (!process.env.APP_ORIGIN || origin !== process.env.APP_ORIGIN) {
+    return res.status(403).json({ error: 'Request origin could not be verified.' });
+  }
+  next();
+});
 
 app.get('/api/health', async (_req, res) => {
   try {
