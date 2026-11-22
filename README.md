@@ -100,3 +100,16 @@ server/index.js         Authenticated PostgreSQL API
 server/auth.js          Registration, login, sessions and auth middleware
 server/schema.postgres.sql PostgreSQL schema and session table
 ```
+
+
+## Optional hosted preview (not production)
+
+A `render.yaml` Blueprint is included for a free preview service on the `production-foundation` branch.
+
+1. Create a Neon PostgreSQL project for testing and copy its pooled or direct connection string.
+2. In Render, create a new Blueprint and select this repository and the `production-foundation` branch.
+3. When prompted, set `DATABASE_URL` to the Neon connection string. Render generates `SESSION_SECRET`.
+4. After Render creates the service, copy its `onrender.com` URL into `APP_ORIGIN` exactly (scheme included, no trailing slash), then redeploy.
+5. Open the service URL and create a test studio account.
+
+This is only a preview. Render Free web services sleep after 15 minutes of inactivity and Render explicitly says not to use Free instances for production applications. Do not put real customer data into the preview. A production launch needs a suitable paid hosting plan, managed database safeguards, backups, and a final security review.
