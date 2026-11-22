@@ -35,7 +35,6 @@ jobs:
         with:
           node-version: 22
       - run: npm install
-      - run: psql "$DATABASE_URL" -f server/schema.postgres.sql
       - run: node --check server/index.js
       - run: node --check server/auth.js
       - run: node --check server/validation.js
