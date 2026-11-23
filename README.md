@@ -1,26 +1,68 @@
-# StudioFlow
+<div align="center">
 
-A full-stack appointment and client management dashboard for a boutique beauty studio. StudioFlow gives a small service business a clear daily schedule, client history, and a lightweight view of studio performance.
+# ✨ StudioFlow
+
+### Your studio, in sync.
+
+A studio management dashboard for appointments, clients, and the everyday rhythm of a service business.
+
+**React · Express · SQLite**
+
+</div>
+
+---
+
+## Product preview
+
+StudioFlow brings a studio's daily operations into one workspace—from the appointment schedule to a quick overview of bookings, revenue, and clients.
+
+### Overview dashboard
+
+<!-- Add the dashboard screenshot at docs/images/dashboard.png -->
+![StudioFlow overview dashboard](docs/images/dashboard.png)
+
+### Appointment management
+
+<!-- Add the appointments screenshot at docs/images/appointments.png -->
+![StudioFlow appointment management](docs/images/appointments.png)
+
+## What StudioFlow does
+
+- **Daily overview** — see today's bookings, revenue, client count, and appointment activity.
+- **Appointment management** — create bookings, search clients and services, filter by status, and export appointments.
+- **Client management** — keep client information and booking history together.
+- **Studio-focused workspace** — organize the day-to-day work of a small service business in one place.
+
+## Built with
+
+| Layer | Technology |
+| --- | --- |
+| Frontend | React, Vite, JavaScript |
+| Backend | Node.js, Express |
+| Database | SQLite |
 
 ## Run locally
 
-Requirements: Node.js 20 or newer.
+**Requirements:** Node.js 20 or newer.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open the Vite address shown in your terminal (usually `http://localhost:5173`). The Express API runs at `http://localhost:4000`. SQLite creates `server/data/studioflow.sqlite` on first run and seeds a handful of sample clients and appointments. To build the frontend, run `npm run build`. To serve only the API, run `npm start`.
+Open the Vite address shown in your terminal (usually `http://localhost:5173`). The Express API runs at `http://localhost:4000`. SQLite creates `server/data/studioflow.sqlite` on first run and seeds sample clients and appointments.
 
-## What it demonstrates
+To build the frontend:
 
-- Responsive React dashboard with overview, appointment, and client views.
-- Express REST API for dashboard metrics, clients, bookings, and booking status updates.
-- SQLite relational data model for clients and appointments, with indexed dates and foreign keys.
-- Appointment creation with client lookup by email, validation, and useful API errors.
-- Search, status filtering, CSV export, and appointment completion.
-- Vite development proxy so the UI can call the API at `/api` without extra setup.
+```bash
+npm run build
+```
+
+To serve only the API:
+
+```bash
+npm start
+```
 
 ## API
 
@@ -43,10 +85,16 @@ server/index.js      Express API, SQLite schema, demo data
 vite.config.js       React plugin and local API proxy
 ```
 
-## Interview walkthrough
+## Development notes
 
-Start with the dashboard: it combines small-business KPIs with the actual day schedule. Add an appointment to show the full request path from a React form through Express validation into SQLite. Then complete a booking and show how the refreshed summary and client history are derived from relational data. The project is intentionally small enough to explain in a short interview while covering the job description’s frontend, backend, API, database, and deployment fundamentals.
+The project demonstrates a responsive React dashboard, an Express REST API, a relational data model for clients and appointments, appointment creation and validation, search and status filtering, CSV export, and a Vite development proxy.
 
-## Production next steps
+For a real studio deployment, the next areas to address include authentication and role-based permissions, timezone-aware scheduling and conflict checks, request rate limiting, automated backups, database migrations, and payment processing. Secrets should be kept in environment variables and the application served over HTTPS.
 
-For a real studio: add sign-in and role-based permissions, timezone-aware scheduling and conflict checks, request rate limiting, automated backups, migrations, and payment processing. Keep secrets in environment variables and serve behind HTTPS.
+---
+
+<div align="center">
+
+**StudioFlow** · Made with care for studios.
+
+</div>
