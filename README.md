@@ -4,7 +4,7 @@
 
 ### Your studio, in sync.
 
-A studio management dashboard for appointments, clients, and the everyday rhythm of a service business.
+A flexible management platform for businesses that work with appointments, clients, and services.
 
 **React · Express · SQLite**
 
@@ -14,7 +14,9 @@ A studio management dashboard for appointments, clients, and the everyday rhythm
 
 ## Product preview
 
-StudioFlow brings a studio's daily operations into one workspace—from the appointment schedule to a quick overview of bookings, revenue, and clients.
+StudioFlow brings day-to-day operations into one workspace—from appointment scheduling and client records to a quick overview of bookings, revenue, and business activity.
+
+It's being designed for a wide range of service-based businesses, rather than one particular industry. The same core workflows can support studios, salons, wellness providers, consultants, tutors, repair services, and other businesses that manage appointments and client relationships.
 
 ### Overview dashboard
 
@@ -28,10 +30,10 @@ StudioFlow brings a studio's daily operations into one workspace—from the appo
 
 ## What StudioFlow does
 
-- **Daily overview** — see today's bookings, revenue, client count, and appointment activity.
+- **Daily overview** — see bookings, revenue, client count, and appointment activity.
 - **Appointment management** — create bookings, search clients and services, filter by status, and export appointments.
 - **Client management** — keep client information and booking history together.
-- **Studio-focused workspace** — organize the day-to-day work of a small service business in one place.
+- **Flexible business workspace** — organize the day-to-day work of different appointment-based and service businesses.
 
 ## Built with
 
@@ -89,12 +91,12 @@ vite.config.js       React plugin and local API proxy
 
 The project demonstrates a responsive React dashboard, an Express REST API, a relational data model for clients and appointments, appointment creation and validation, search and status filtering, CSV export, and a Vite development proxy.
 
-For a real studio deployment, the next areas to address include authentication and role-based permissions, timezone-aware scheduling and conflict checks, request rate limiting, automated backups, database migrations, and payment processing. Secrets should be kept in environment variables and the application served over HTTPS.
+For a real business deployment, the next areas to address include authentication and role-based permissions, timezone-aware scheduling and conflict checks, request rate limiting, automated backups, database migrations, and payment processing. Secrets should be kept in environment variables and the application served over HTTPS.
 
 ---
 
 <div align="center">
 
-**StudioFlow** · Made with care for studios.
+**StudioFlow** · Made for businesses built around people and appointments.
 
 </div>
