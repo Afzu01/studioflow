@@ -1,130 +1,57 @@
 # StudioFlow
 
-StudioFlow is being developed as a **client-centric operations platform** that brings together client relationships, scheduling, tasks, follow-ups and automation in one workspace.
+StudioFlow is a project I'm building to make it easier to manage clients, appointments, and the work that happens around them.
 
-**Product vision:** one place where your calendar, clients, communications and workflows work together.
+I started with appointment and client management. Over time, I want to bring calendars, notes, tasks, follow-ups, and useful automation into the same workspace. The aim is to make StudioFlow useful for different kinds of service businesses, not just salons.
 
-StudioFlow is intended for appointment- and relationship-driven professionals and small teams across industries—not only salons. Potential users include freelancers, consultants, agencies, coaches, tutors, clinics, wellness providers and other service businesses.
+This project is still a work in progress. Some of the ideas below are plans, not finished features.
 
-## Product direction
+## What I want to build
 
-StudioFlow's long-term direction combines three capabilities:
+- Manage clients and keep their information in one place.
+- Create and manage appointments.
+- Connect appointments with client notes, tasks, and follow-ups.
+- Connect calendars people already use, such as Google Calendar and Outlook.
+- Add automation for routine reminders and follow-up work.
+- Explore an AI assistant that can help with everyday tasks, with the user in control of important actions.
 
-1. **Client operations:** client profiles, relationship history, meetings, notes, tasks and follow-ups.
-2. **Universal calendar:** a central scheduling experience that can connect to existing calendars rather than requiring users to replace them.
-3. **AI operating layer:** natural-language assistance and permission-controlled automation across StudioFlow workflows.
+I don't want StudioFlow to become another calendar or CRM that tries to replace every tool. I want it to connect the schedule with the client information and work that comes with it.
 
-The goal is to become the client-centric layer connecting a user's schedule with the people and business activities behind it.
+## What's working so far
 
-### What StudioFlow aims to do
+The `production-foundation` branch is where I'm building the backend and authentication foundation.
 
-- Keep client and contact records connected to meetings and appointments.
-- Manage appointments, tasks, availability and follow-up actions.
-- Connect external calendars, with Google Calendar, Apple Calendar and Microsoft Outlook as intended integration targets.
-- Provide workflow automation for reminders, follow-ups and routine operations.
-- Add an AI assistant that can answer questions and carry out authorised actions.
-- Support different business types through configurable services, fields, roles and workflows.
-- Evolve toward international use with multiple time zones, locales and currencies.
+Current implementation includes:
 
-**Important:** These are product goals, not claims that all features are currently implemented. Calendar synchronisation, Siri/voice actions, AI automation, payments and multi-industry templates are planned capabilities.
-
-## Product principles and differentiation
-
-StudioFlow is not intended to replace every calendar, CRM or automation platform. Its intended differentiation is the relationship context connecting them:
-
-- **Client-centric context:** events can be associated with client records, notes, history and next steps.
-- **Calendar interoperability:** integrate with calendars people already use.
-- **Connected workflows:** turn meetings and client activity into reminders, tasks and follow-ups.
-- **Actionable AI:** allow an assistant to work with real business data under explicit permissions and appropriate confirmation.
-- **Configurable core:** support multiple service industries without creating a separate product for each one.
-- **Open integrations:** provide APIs and webhooks so StudioFlow can work with other tools.
-
-## Competitive landscape
-
-StudioFlow operates across several established software categories. These companies are useful competitive benchmarks; they are not all direct, identical competitors.
-
-| Category | Products to study | Relevant capabilities |
-| --- | --- | --- |
-| Calendar and scheduling | [Calendly](https://calendly.com/), [Motion](https://www.usemotion.com/), [Reclaim](https://reclaim.ai/), [Morgen](https://www.morgen.so/) | Scheduling, availability, calendar aggregation and planning |
-| CRM and client operations | [HubSpot](https://www.hubspot.com/), [Zoho](https://www.zoho.com/), [Salesforce](https://www.salesforce.com/), [Dubsado](https://www.dubsado.com/) | Client records, relationship history, sales and business workflows |
-| AI and automation | [Lindy](https://www.lindy.ai/), [Zapier](https://zapier.com/), [Make](https://www.make.com/) | AI agents, integrations and multi-step automation |
-| Productivity ecosystems | [Google Workspace](https://workspace.google.com/), [Microsoft 365](https://www.microsoft.com/microsoft-365), [Apple](https://www.apple.com/) | Calendars, communication, identity and assistant experiences |
-
-The initial strategy is not to out-feature large CRM or productivity suites. It is to deliver an excellent end-to-end workflow for independent professionals and small teams: connect a calendar, maintain a client profile, schedule a meeting and reliably manage the follow-up.
-
-## Roadmap
-
-The following is a proposed sequence. Dates and durations are planning estimates, not delivery commitments.
-
-### Phase 1 — Functional core
-
-- Complete client create, read, update and delete workflows.
-- Complete appointment creation, editing, cancellation and status management.
-- Add services, staff profiles and working hours.
-- Implement availability checks and robust double-booking prevention.
-- Build a useful dashboard and client-facing booking experience.
-- Verify that all workflows persist correctly in PostgreSQL.
-
-**Milestone:** a small business can manage its everyday client and appointment workflow.
-
-### Phase 2 — Pilot readiness
-
-- Add booking confirmations and configurable reminders.
-- Build client history and follow-up tracking.
-- Add basic business reports and CSV export.
-- Improve mobile usability, error handling and accessibility.
-- Establish backups, monitoring and operational support.
-
-**Milestone:** a small group of pilot businesses can use StudioFlow with test or consented data and provide feedback.
-
-### Phase 3 — Client operations platform
-
-- Add tasks, notes and a unified client activity timeline.
-- Add staff roles, permissions and resource availability.
-- Support configurable business profiles, services and custom fields.
-- Add multiple locations where needed.
-- Define stable APIs and webhooks.
-
-**Milestone:** different kinds of service businesses can configure the same platform without bespoke application code.
-
-### Phase 4 — Calendar interoperability and global readiness
-
-- Integrate Google Calendar.
-- Investigate Apple Calendar interoperability and supported iOS integrations.
-- Integrate Microsoft Outlook Calendar.
-- Design reliable two-way synchronisation, conflict handling and event ownership.
-- Support time zones, daylight-saving transitions, locale formats and multiple currencies.
-- Review privacy, data export, deletion and regional compliance requirements.
-
-**Milestone:** users can connect their existing calendars and manage client context through StudioFlow.
-
-### Phase 5 — Automation and AI
-
-- Build a workflow engine with triggers, conditions and actions.
-- Add authorised reminders and follow-up automation.
-- Introduce a natural-language assistant for StudioFlow data.
-- Add approval steps for consequential actions.
-- Explore Siri Shortcuts/App Intents, voice interfaces and other assistant integrations.
-- Add analytics and useful business insights.
-
-**Milestone:** StudioFlow can safely automate useful client and scheduling workflows, with users retaining control.
-
-## Current development status
-
-The `production-foundation` branch contains the first authenticated multi-studio implementation:
-
-- Salon-owner registration and sign-in (the initial onboarding language is salon-oriented and will need to become industry-neutral).
+- Owner registration and sign-in.
 - Password hashing with bcrypt.
-- Server-side sessions stored in PostgreSQL; browser cookies are HTTP-only.
-- Studio-scoped customer and appointment queries.
-- PostgreSQL data model with tenant-aware foreign keys and indexes.
-- Appointment overlap checks serialized per studio.
-- Studio-local date/time handling for the dashboard, booking form, and monthly metrics.
-- PostgreSQL-backed integration tests for registration, session enforcement, tenant isolation, malformed dates, and booking conflicts.
-- Studio-local appointment scheduling and daily summaries (new studios default to Asia/Kolkata).
-- Basic security headers, same-origin checks and sign-in rate limiting.
+- Server-side sessions stored in PostgreSQL.
+- Studio-scoped customer and appointment API routes.
+- A PostgreSQL schema with tenant-aware relationships and indexes.
+- Appointment overlap checks to prevent double-booking.
+- Studio-local date and time handling in the dashboard and booking flow.
+- Basic security headers, same-origin checks, and sign-in rate limiting.
+- API integration tests using a temporary PostgreSQL database.
 
-The project is an early development foundation and hosted preview, **not a production-ready launch**. The initial schema has been applied to the Neon preview database and a test studio account was successfully created. That does not constitute a complete production security, reliability or end-to-end validation review. Do not use the preview with real customer data.
+The first signup and database setup have been tested on the hosted preview. The app is still early: not every dashboard screen or workflow is complete, and this is not ready for real customer data or production use.
+
+## What I'm working towards
+
+These are the next areas I want to work on. They are not all implemented yet.
+
+1. Finish the basic client and appointment workflows.
+2. Make the dashboard and booking experience more useful on mobile.
+3. Add client notes, history, tasks, and follow-ups.
+4. Make StudioFlow work for different types of service businesses.
+5. Connect external calendars and handle sync conflicts properly.
+6. Add workflow automation and, later, an AI assistant.
+
+## Tech stack
+
+- React and Vite
+- Node.js and Express
+- PostgreSQL
+- JavaScript
 
 ## Requirements
 
@@ -159,7 +86,9 @@ The project is an early development foundation and hosted preview, **not a produ
    npm run dev
    ```
 
-Open the Vite URL shown in your terminal (normally `http://localhost:5173`). For a production-style run, execute `npm run build` and then `npm start`; Express serves the compiled frontend from `dist/`. Create a studio account from the registration screen. The generated studio slug is shown in the workspace sidebar; keep it safe because it is required for sign-in.
+Open the Vite URL shown in your terminal (normally `http://localhost:5173`). For a production-style run, execute `npm run build` and then `npm start`; Express serves the compiled frontend from `dist/`.
+
+Create a studio account from the registration screen. The generated studio slug is shown in the workspace sidebar; keep it safe because it is required for sign-in.
 
 ## Environment variables
 
@@ -186,39 +115,47 @@ Open the Vite URL shown in your terminal (normally `http://localhost:5173`). For
 | `PATCH` | `/api/appointments/:id/status` | Update a studio appointment (authentication required) |
 | `GET` | `/api/customers` | Studio customers (authentication required) |
 
-## Before any public or commercial launch
+## Before using this with real businesses
 
-- Run dependency installation, production build, linting and automated API tests (the CI workflow provisions a temporary PostgreSQL instance and runs the API integration suite).
-- Test registration, login, logout, session expiry and password handling.
-- Prove tenant isolation with two separate studios and attempt cross-studio reads and writes.
-- Test appointment overlaps, simultaneous booking requests, invalid inputs and timezone boundaries.
-- Add email verification, password reset, staff invitations and role-based permissions.
-- Add a studio timezone setting and use it consistently for calendar display and reporting.
-- Add database backups, restore drills, monitoring, error reporting and a migration process.
-- Configure HTTPS, production secrets, trusted proxy settings, database connection limits and a permitted commercial hosting plan.
-- Review privacy policy, terms, data retention and applicable customer-data obligations.
-- Complete end-to-end tests of the real booking and client workflows.
-- Review external calendar OAuth scopes, token storage, synchronisation conflicts and revocation before enabling calendar integrations.
-- Add clear AI permissions, audit logs, confirmation steps and safeguards before AI can perform business actions.
+There is still work to do before a public or commercial launch:
+
+- Finish and test the main client and appointment workflows.
+- Test registration, login, logout, session expiry, and password handling.
+- Test that one studio cannot access another studio's data.
+- Test simultaneous bookings and timezone edge cases.
+- Add email verification, password reset, staff invitations, and permissions.
+- Set up database backups and test restoring them.
+- Add monitoring and error reporting.
+- Review hosting, HTTPS, secrets, and database settings.
+- Prepare a privacy policy and terms.
+- Test the complete booking and client workflows.
+- Review calendar permissions and sync behaviour before adding calendar integrations.
+- Add permission checks and confirmations before an AI assistant can take actions.
+
+The CI workflow runs the API integration tests against PostgreSQL and builds the frontend.
 
 ## Project structure
 
 ```text
-src/App.jsx             React dashboard and owner authentication screens
-src/styles.css          Responsive dashboard and authentication styles
-server/index.js         Authenticated PostgreSQL API
-server/auth.js          Registration, login, sessions and auth middleware
-server/schema.postgres.sql PostgreSQL schema and session table
+src/App.jsx                  React dashboard and owner authentication screens
+src/styles.css               Responsive dashboard and authentication styles
+server/index.js              Authenticated PostgreSQL API
+server/auth.js               Registration, login, sessions and auth middleware
+server/schema.postgres.sql   PostgreSQL schema and session table
 ```
 
-## Optional hosted preview (not production)
+## Hosted preview
 
-A `render.yaml` Blueprint is included for a free preview service on the `production-foundation` branch.
+A `render.yaml` Blueprint is included for a preview deployment on the `production-foundation` branch.
 
-1. Create a Neon PostgreSQL project for testing and copy its pooled or direct connection string.
+1. Create a Neon PostgreSQL project for testing and copy its connection string.
 2. In Render, create a new Blueprint and select this repository and the `production-foundation` branch.
-3. When prompted, set `DATABASE_URL` to the Neon connection string. Render generates `SESSION_SECRET`.
-4. After Render creates the service, copy its `onrender.com` URL into `APP_ORIGIN` exactly (scheme included, no trailing slash), then redeploy.
+3. Set `DATABASE_URL` to the Neon connection string. Render generates `SESSION_SECRET`.
+4. After Render creates the service, copy its `onrender.com` URL into `APP_ORIGIN` exactly (include `https://`, with no trailing slash), then redeploy.
 5. Open the service URL and create a test studio account.
 
-This is only a preview. Render Free web services sleep after 15 minutes of inactivity and Render explicitly says not to use Free instances for production applications. Do not put real customer data into the preview. A production launch needs a suitable paid hosting plan, managed database safeguards, backups, and a final security review.
+This is a preview deployment, not production hosting. Render Free services can sleep after inactivity, and the preview should only be used with test data. Don't enter real customer information.
+
+---
+
+I'm building StudioFlow in public and will update this README as the project changes.
