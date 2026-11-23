@@ -12,21 +12,11 @@ A flexible management platform for businesses that work with appointments, clien
 
 ---
 
-## Product preview
+## About StudioFlow
 
 StudioFlow brings day-to-day operations into one workspace—from appointment scheduling and client records to a quick overview of bookings, revenue, and business activity.
 
 It's being designed for a wide range of service-based businesses, rather than one particular industry. The same core workflows can support studios, salons, wellness providers, consultants, tutors, repair services, and other businesses that manage appointments and client relationships.
-
-### Overview dashboard
-
-<!-- Add the dashboard screenshot at docs/images/dashboard.png -->
-![StudioFlow overview dashboard](docs/images/dashboard.png)
-
-### Appointment management
-
-<!-- Add the appointments screenshot at docs/images/appointments.png -->
-![StudioFlow appointment management](docs/images/appointments.png)
 
 ## What StudioFlow does
 
