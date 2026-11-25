@@ -1,56 +1,67 @@
 <div align="center">
 
-# ✨ StudioFlow
+# StudioFlow
 
 ### Your studio, in sync.
 
-A flexible management platform for businesses that work with appointments, clients, and services.
+A management app for businesses that work with appointments, clients, and services.
 
-**React · Express · SQLite**
+**React · Vite · Express · SQLite**
 
 </div>
 
 ---
 
-## About StudioFlow
+## About the project
 
-StudioFlow brings day-to-day operations into one workspace—from appointment scheduling and client records to a quick overview of bookings, revenue, and business activity.
+I started StudioFlow as a way to build a practical booking and client-management application. I wanted the core workflow to work for different appointment-based businesses, rather than tying it to one industry.
 
-It's being designed for a wide range of service-based businesses, rather than one particular industry. The same core workflows can support studios, salons, wellness providers, consultants, tutors, repair services, and other businesses that manage appointments and client relationships.
+The current app brings appointment scheduling, client records, and a business overview into one interface. The examples and seeded records are for demonstration.
 
-## What StudioFlow does
+## What is implemented
 
-- **Daily overview** — see bookings, revenue, client count, and appointment activity.
-- **Appointment management** — create bookings, search clients and services, filter by status, and export appointments.
-- **Client management** — keep client information and booking history together.
-- **Flexible business workspace** — organize the day-to-day work of different appointment-based and service businesses.
+- **Overview** — dashboard metrics for bookings, revenue, clients, and upcoming appointments.
+- **Appointments** — create bookings, search and filter records, and update appointment status.
+- **Clients** — view client details, booking counts, and completed booking value.
+- **Local persistence** — store clients and appointments in SQLite.
+- **CSV export** — export appointment data from the interface.
 
-## Built with
+## Technology
 
 | Layer | Technology |
 | --- | --- |
 | Frontend | React, Vite, JavaScript |
 | Backend | Node.js, Express |
-| Database | SQLite |
+| Database | SQLite through better-sqlite3 |
+| UI icons | lucide-react |
 
 ## Run locally
 
 **Requirements:** Node.js 20 or newer.
 
+Install dependencies:
+
 ```bash
 npm install
+```
+
+Start the frontend and API together:
+
+```bash
 npm run dev
 ```
 
-Open the Vite address shown in your terminal (usually `http://localhost:5173`). The Express API runs at `http://localhost:4000`. SQLite creates `server/data/studioflow.sqlite` on first run and seeds sample clients and appointments.
+Open the Vite address shown in the terminal (usually http://localhost:5173). The API runs at http://localhost:4000.
 
-To build the frontend:
+The SQLite database is created at `server/data/studioflow.sqlite` on first run. The server seeds sample clients and appointments when the database has no clients.
+
+Build the frontend:
 
 ```bash
 npm run build
 ```
 
-To serve only the API:
+Start only the API:
 
 ```bash
 npm start
@@ -60,33 +71,41 @@ npm start
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/health` | Service health |
+| `GET` | `/api/health` | API health response |
 | `GET` | `/api/summary` | Dashboard metrics |
-| `GET` | `/api/appointments?status=confirmed&search=Olivia` | Search and filter bookings |
-| `POST` | `/api/appointments` | Add a booking and create or reuse its client |
-| `PATCH` | `/api/appointments/:id/status` | Mark a booking confirmed, completed, or cancelled |
-| `GET` | `/api/customers` | Client list and lifetime booking value |
+| `GET` | `/api/appointments` | List appointments; supports status, search, and day filters |
+| `POST` | `/api/appointments` | Create an appointment and create or reuse its client |
+| `PATCH` | `/api/appointments/:id/status` | Update appointment status |
+| `GET` | `/api/customers` | List clients with booking and completed-value totals |
 
-`POST /api/appointments` accepts `name`, `email`, `service`, and `startsAt`; `phone`, `durationMinutes`, `amount`, and `notes` are optional. `startsAt` should be an ISO date-time string.
+For appointment creation, the API accepts `name`, `email`, `service`, and `startsAt`. Optional fields include `phone`, `durationMinutes`, `amount`, and `notes`. Use an ISO date-time string for `startsAt`.
 
 ## Project structure
 
 ```text
-src/                 React application and responsive styles
-server/index.js      Express API, SQLite schema, demo data
-vite.config.js       React plugin and local API proxy
+src/                 React application and styles
+server/index.js      Express API, SQLite schema, and sample data
+vite.config.js       Vite configuration and local API proxy
 ```
 
 ## Development notes
 
-The project demonstrates a responsive React dashboard, an Express REST API, a relational data model for clients and appointments, appointment creation and validation, search and status filtering, CSV export, and a Vite development proxy.
+The code includes a local SQLite data store and sample data. This is currently a local application setup; authentication, role-based permissions, timezone-aware scheduling, booking conflict checks, backups, and payment processing are not implemented as production safeguards.
 
-For a real business deployment, the next areas to address include authentication and role-based permissions, timezone-aware scheduling and conflict checks, request rate limiting, automated backups, database migrations, and payment processing. Secrets should be kept in environment variables and the application served over HTTPS.
+I have not recorded automated test results or a production deployment for this repository.
+
+## Possible next steps
+
+- Add authentication and role-based access.
+- Add timezone-aware booking and availability conflict checks.
+- Add database migrations and automated backups.
+- Add API and UI tests.
+- Review security and deployment configuration before using real customer data.
 
 ---
 
 <div align="center">
 
-**StudioFlow** · Made for businesses built around people and appointments.
+**StudioFlow** · Built by Afzal Hussain
 
 </div>
